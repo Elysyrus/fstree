@@ -5,4 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(fstree src/main.cpp)
+add_executable(fstree
+    src/main.cpp
+    src/scanner.cpp    # 新增这行
+)

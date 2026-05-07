@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 // 打印使用说明
 void print_usage() {
     std::cout << "fstree - file system tree analyzer" << std::endl;
@@ -21,15 +23,19 @@ int main(int argc, char* argv[]) {
         print_usage();
         return 1;
     }
+    // 把字符串变成 fs::path 对象
+    // fs::path 不只是字符串，它理解路径的结构（斜杠、文件名、扩展名等）
+    fs::path target(args[0]);
+    // 用 fs 的函数检查路径
+    std::cout << "Path: "       << target                    << std::endl;
+    std::cout << "Exists: "     << fs::exists(target)        << std::endl;
+    std::cout << "Is dir: "     << fs::is_directory(target)  << std::endl;
+    std::cout << "Is file: "    << fs::is_regular_file(target) << std::endl;
 
-    // 用 range-based for 遍历所有参数，先打印出来看看
-    std::cout << "Arguments received:" << std::endl;
-    for (const auto& arg : args) {
-        std::cout << "  " << arg << std::endl;
+    // 如果是普通文件，打印大小
+    if (fs::is_regular_file(target)) {
+        std::cout << "Size: " << fs::file_size(target) << " bytes" << std::endl;
     }
-
-    auto target_path = args[0];
-    std::cout << "\nTarget path: " << target_path << std::endl;
 
     return 0;
 }

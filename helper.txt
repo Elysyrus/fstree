@@ -14,3 +14,10 @@ fix 修复 bug
 refactor    重构代码（功能没变）
 docs    改了文档/注释
 chore   改了构建配置等杂项
+
+必须理解：fs::path 不是字符串 它知道路径的结构，这就是它强大的地方
+fs::path p = "src/main.cpp";
+p.filename()   // → "main.cpp"    文件名
+p.stem()       // → "main"        不含扩展名
+p.extension()  // → ".cpp"        扩展名
+p.parent_path()// → "src"         父目录
