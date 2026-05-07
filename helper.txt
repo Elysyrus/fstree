@@ -1,4 +1,16 @@
 第一次构建
+-B build负责生成构建文件, --build build是编译
 # 在 fstree/ 目录下执行
-cmake -B build -G "Ninja"
+cmake -B build -G "Ninja"    
 cmake --build build
+
+Git有三个区域：工作区/暂存区/仓库
+五步走 git pull -> git status -> git add -> git commit -> git push
+
+commit message 怎么写
+格式：类型: 简短描述
+feat    新增功能
+fix 修复 bug
+refactor    重构代码（功能没变）
+docs    改了文档/注释
+chore   改了构建配置等杂项
