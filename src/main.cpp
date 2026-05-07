@@ -2,39 +2,60 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include "scanner.hpp"   // 引入我们自己写的模块
 
 namespace fs = std::filesystem;
-// 打印使用说明
-void print_usage() {
-    std::cout << "fstree - file system tree analyzer" << std::endl;
-    std::cout << "Usage: fstree <path> [options]" << std::endl;
-    std::cout << "  <path>   Directory to analyze" << std::endl;
+
+// 把字节数转成人类可读的格式：1024 → "1.0 KB"
+// 这个函数先让 AI 生成，重点在于理解它被调用的地方
+std::string human_size(uint64_t bytes) {
+    const double KB = 1024.0;
+    const double MB = 1024.0 * 1024.0;
+    const double GB = 1024.0 * 1024.0 * 1024.0;
+
+    char buf[32];
+    if (bytes >= GB)
+        snprintf(buf, sizeof(buf), "%.1f GB", bytes / GB);
+    else if (bytes >= MB)
+        snprintf(buf, sizeof(buf), "%.1f MB", bytes / MB);
+    else if (bytes >= KB)
+        snprintf(buf, sizeof(buf), "%.1f KB", bytes / KB);
+    else
+        snprintf(buf, sizeof(buf), "%llu B", (unsigned long long)bytes);
+    return std::string(buf);
 }
 
-// main函数里面的参数是命令行工具的入口
-// argc 是命令行参数的数量，argv 是一个数组，包含了所有的命令行参数
 int main(int argc, char* argv[]) {
-    // 把命令行参数转成 vector，更方便处理
-    // argv 是 C 风格的数组，这里把它转成现代 C++ 的 vector
-    // auto是类型推断，让编译器自行推断这是什么类型
+    // 含义是：把命令行参数（argv 数组）转成一个 vector<string>，跳过第 0 个（程序名本身）。
     auto args = std::vector<std::string>(argv + 1, argv + argc);
 
     if (args.empty()) {
-        print_usage();
+        std::cout << "Usage: fstree <path>" << std::endl;
         return 1;
     }
-    // 把字符串变成 fs::path 对象
-    // fs::path 不只是字符串，它理解路径的结构（斜杠、文件名、扩展名等）
-    fs::path target(args[0]);
-    // 用 fs 的函数检查路径
-    std::cout << "Path: "       << target                    << std::endl;
-    std::cout << "Exists: "     << fs::exists(target)        << std::endl;
-    std::cout << "Is dir: "     << fs::is_directory(target)  << std::endl;
-    std::cout << "Is file: "    << fs::is_regular_file(target) << std::endl;
 
-    // 如果是普通文件，打印大小
-    if (fs::is_regular_file(target)) {
-        std::cout << "Size: " << fs::file_size(target) << " bytes" << std::endl;
+    fs::path target(args[0]);
+
+    if (!fs::exists(target)) {
+        std::cerr << "Error: path does not exist: " << target << std::endl;
+        return 1;
+    }
+
+    if (!fs::is_directory(target)) {
+        std::cerr << "Error: not a directory: " << target << std::endl;
+        return 1;
+    }
+
+    // 计算并打印总大小
+    auto total = calc_size(target);
+    std::cout << "📁 " << target.filename().string()
+              << "  (" << human_size(total) << ")" << std::endl;
+
+    // 打印第一层子项（还没有树形，先用简单格式）
+    for (const auto& entry : fs::directory_iterator(target)) {
+        auto size = calc_size(entry.path());
+        auto name = entry.path().filename().string();
+        std::cout << "  " << name << "  " << human_size(size) << std::endl;
     }
 
     return 0;
