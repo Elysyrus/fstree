@@ -2,31 +2,16 @@
 #include <string>
 #include <vector>
 #include <filesystem>
-#include "scanner.hpp"   // 引入我们自己写的模块
+#include <algorithm>
+#include "scanner.hpp"
+#include "encoding_fix.hpp"
 
 namespace fs = std::filesystem;
 
-// 把字节数转成人类可读的格式：1024 → "1.0 KB"
-// 这个函数先让 AI 生成，重点在于理解它被调用的地方
-std::string human_size(uint64_t bytes) {
-    const double KB = 1024.0;
-    const double MB = 1024.0 * 1024.0;
-    const double GB = 1024.0 * 1024.0 * 1024.0;
-
-    char buf[32];
-    if (bytes >= GB)
-        snprintf(buf, sizeof(buf), "%.1f GB", bytes / GB);
-    else if (bytes >= MB)
-        snprintf(buf, sizeof(buf), "%.1f MB", bytes / MB);
-    else if (bytes >= KB)
-        snprintf(buf, sizeof(buf), "%.1f KB", bytes / KB);
-    else
-        snprintf(buf, sizeof(buf), "%llu B", (unsigned long long)bytes);
-    return std::string(buf);
-}
+// 声明 human_size（定义在 scanner.cpp 里）
+std::string human_size(uint64_t bytes);
 
 int main(int argc, char* argv[]) {
-    // 含义是：把命令行参数（argv 数组）转成一个 vector<string>，跳过第 0 个（程序名本身）。
     auto args = std::vector<std::string>(argv + 1, argv + argc);
 
     if (args.empty()) {
@@ -34,28 +19,37 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    fs::path target(args[0]);
+    fs::path target = path_from_narrow(args[0]);
 
     if (!fs::exists(target)) {
         std::cerr << "Error: path does not exist: " << target << std::endl;
         return 1;
     }
-
     if (!fs::is_directory(target)) {
         std::cerr << "Error: not a directory: " << target << std::endl;
         return 1;
     }
 
-    // 计算并打印总大小
+    // 打印根目录
     auto total = calc_size(target);
-    std::cout << "📁 " << target.filename().string()
+    std::cout << "📁 " << to_utf8(target.filename())
               << "  (" << human_size(total) << ")" << std::endl;
 
-    // 打印第一层子项（还没有树形，先用简单格式）
+    // 收集根目录的子项
+    std::vector<fs::path> children;
+    // 把target目录下的所有项都放到children里
     for (const auto& entry : fs::directory_iterator(target)) {
-        auto size = calc_size(entry.path());
-        auto name = entry.path().filename().string();
-        std::cout << "  " << name << "  " << human_size(size) << std::endl;
+        children.push_back(entry.path());
+    }
+    // 按照路径排序，保证输出稳定（不加这个，每次运行可能顺序都不一样）
+    std::sort(children.begin(), children.end());
+
+    // 打印树
+    for (size_t i = 0; i < children.size(); ++i) {
+        bool is_last = (i == children.size() - 1);
+        try {
+            print_tree(children[i], "", is_last);
+        } catch (const fs::filesystem_error&) {}
     }
 
     return 0;

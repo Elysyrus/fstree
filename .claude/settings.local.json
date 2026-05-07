@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake ..)",
+      "Bash(cmake --build .)",
+      "PowerShell($mt = \"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\Shared\\\\NuGetPackages\\\\microsoft.windows.sdk.buildtools\\\\10.0.26100.1742\\\\bin\\\\10.0.26100.0\\\\x64\\\\mt.exe\"; Set-Location d:\\\\projects\\\\fstree\\\\build; & $mt -nologo -inputresource:fstree.exe `;1 -out:gen.manifest; Write-Host \"Extracted manifest:\"; Get-Content gen.manifest; Write-Host \"`nMerging...\"; & $mt -nologo -manifest gen.manifest -manifest ..\\\\src\\\\fstree.manifest -outputresource:fstree.exe `;1; Write-Host \"Done. Testing...\"; .\\\\fstree.exe \"d:\\\\projects\\\\fstree\\\\测试目录\" 2>&1)",
+      "PowerShell($mt = \"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\Shared\\\\NuGetPackages\\\\microsoft.windows.sdk.buildtools\\\\10.0.26100.1742\\\\bin\\\\10.0.26100.0\\\\x64\\\\mt.exe\"; Set-Location d:\\\\projects\\\\fstree\\\\build; & $mt -nologo \"-inputresource:fstree.exe;#1\" \"-out:gen.manifest\"; & $mt -nologo -manifest gen.manifest -manifest ..\\\\src\\\\fstree.manifest \"-outputresource:fstree.exe;#1\"; Write-Host \"Testing...\"; .\\\\fstree.exe \"d:\\\\projects\\\\fstree\\\\测试目录\" 2>&1)",
+      "PowerShell($mt = \"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\Shared\\\\NuGetPackages\\\\microsoft.windows.sdk.buildtools\\\\10.0.26100.1742\\\\bin\\\\10.0.26100.0\\\\x64\\\\mt.exe\"; Set-Location d:\\\\projects\\\\fstree\\\\build; & $mt -nologo \"-inputresource:fstree.exe;#1\" \"-out:check_embedded.manifest\"; Write-Host \"=== Embedded manifest ===\"; Get-Content check_embedded.manifest; Write-Host \"`n=== Testing ===\"; .\\\\fstree.exe \"d:\\\\projects\\\\fstree\\\\测试目录\" 2>&1)"
+    ]
+  }
+}
