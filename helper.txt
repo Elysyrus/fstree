@@ -1,0 +1,4 @@
+第一次构建
+# 在 fstree/ 目录下执行
+cmake -B build -G "Ninja"
+cmake --build build
